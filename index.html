@@ -19,7 +19,7 @@
         #app-container {
             width: 100%;
             max-width: 400px;
-            height: 600px;
+            height: 650px;
             position: relative;
             background: #fff;
             border-radius: 12px;
@@ -45,8 +45,8 @@
             padding: 20px;
         }
         .card {
-            width: 80%;
-            height: 80%;
+            width: 85%;
+            height: 90%;
             background: #fff;
             border: 2px solid #e5e7eb;
             border-radius: 12px;
@@ -54,25 +54,42 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             text-align: center;
             padding: 20px;
+            box-sizing: border-box;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        .card h2 {
-            font-size: 1.2rem;
+        .card img {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
             margin-bottom: 15px;
+            background-color: #f9fafb;
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: auto;
             color: #1f2937;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
         .card a {
-            padding: 10px 20px;
+            padding: 12px 24px;
             background: #2563eb;
             color: #fff;
             text-decoration: none;
             border-radius: 6px;
             font-weight: bold;
-            margin-top: 10px;
+            margin-top: 15px;
+            width: 80%;
+        }
+        .card a:hover {
+            background: #1d4ed8;
         }
         .controls {
             display: flex;
@@ -107,11 +124,22 @@
         .summary-item {
             padding: 15px;
             border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .summary-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: #f3f4f6;
         }
         .summary-item a {
             color: #2563eb;
             text-decoration: none;
             font-weight: bold;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -136,16 +164,53 @@
 </div>
 
 <script>
+    // REPLACE THE PLACEHOLDER IMAGE URLS BELOW WITH THE ACTUAL IMAGE ADDRESSES
     const hats = [
-        { title: "adidas Men's Tour Five-Panel Golf Cap", url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black" },
-        { title: "Columbia Men's PFG Mesh Hooks Ball Cap", url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather" },
-        { title: "VRST Men's Ultimate Cap", url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black" },
-        { title: "Salty Crew Men's Sea Line Retro Trucker Hat", url: "https://www.dickssportinggoods.com/p/salty-crew-mens-sea-line-retro-trucker-hat-19eozmslnrtrtrckracc/19eozmslnrtrtrckracc?color=Black" },
-        { title: "Waggle Men's Moon Shot Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-moon-shot-golf-hat-25wagmgolfmnshtblkqkw/25wagmgolfmnshtblkqkw?color=Black" },
-        { title: "Waggle Men's Albatross Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-albatross-golf-hat-26wagmgolfuq3r2bjjhh4/26wagmgolfuq3r2bjjhh4?color=Gray" },
-        { title: "Waggle Men's Shooter Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-shooter-golf-hat-25wagmgolfshtrhtblbab/25wagmgolfshtrhtblbab?color=Black" },
-        { title: "GHOST GOLF Men's Icon Patch Golf Hat", url: "https://www.dickssportinggoods.com/p/chost-golf-mens-icon-patch-golf-hat-25pvmacnptchwhtxxapa/25pvmacnptchwhtxxapa?color=White" },
-        { title: "Waggle Men's Snapper Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-snapper-golf-hat-25wagmgolfsnpprtnxabu/25wagmgolfsnpprtnxabu?color=Tan" }
+        { 
+            title: "adidas Men's Tour Five-Panel Golf Cap", 
+            url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/23ADIMTRFVPNLBLKXAPA_Black?wid=481&qlt=70&hei=481&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Columbia Men's PFG Mesh Hooks Ball Cap", 
+            url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/19CMBMPFGMSHHKSBLFAC_Grill_Heather?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "VRST Men's Ultimate Cap", 
+            url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/21KRMMTHLTMTCPXXXMPD_Pure_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Salty Crew Men's Sea Line Retro Trucker Hat", 
+            url: "https://www.dickssportinggoods.com/p/salty-crew-mens-sea-line-retro-trucker-hat-19eozmslnrtrtrckracc/19eozmslnrtrtrckracc?color=Black",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/19EOZMSLNRTRTRCKRACC_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Waggle Men's Moon Shot Golf Hat", 
+            url: "https://www.dickssportinggoods.com/p/waggle-mens-moon-shot-golf-hat-25wagmgolfmnshtblkqkw/25wagmgolfmnshtblkqkw?color=Black",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFMNSHTBLKQKW_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Waggle Men's Albatross Golf Hat", 
+            url: "https://www.dickssportinggoods.com/p/waggle-mens-albatross-golf-hat-26wagmgolfuq3r2bjjhh4/26wagmgolfuq3r2bjjhh4?color=Gray",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/26WAGMGOLFUQ3R2BJJHH4_Gray?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Waggle Men's Shooter Golf Hat", 
+            url: "https://www.dickssportinggoods.com/p/waggle-mens-shooter-golf-hat-25wagmgolfshtrhtblbab/25wagmgolfshtrhtblbab?color=Black",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSHTRHTBLBAB_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "GHOST GOLF Men's Icon Patch Golf Hat", 
+            url: "https://www.dickssportinggoods.com/p/chost-golf-mens-icon-patch-golf-hat-25pvmacnptchwhtxxapa/25pvmacnptchwhtxxapa?color=White",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/25PVMACNPTCHWHTXXAPA_White?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        },
+        { 
+            title: "Waggle Men's Snapper Golf Hat", 
+            url: "https://www.dickssportinggoods.com/p/waggle-mens-snapper-golf-hat-25wagmgolfsnpprtnxabu/25wagmgolfsnpprtnxabu?color=Tan",
+            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSNPPRTNXABU_Tan?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
+        }
     ];
 
     let currentIndex = 0;
@@ -163,6 +228,7 @@
         card.className = 'card';
         card.id = 'current-card';
         card.innerHTML = `
+            <img src="${hat.image}" alt="${hat.title}" loading="lazy">
             <h2>${hat.title}</h2>
             <a href="${hat.url}" target="_blank">View on Store</a>
         `;
@@ -205,7 +271,10 @@
         likedHats.forEach(hat => {
             const item = document.createElement('div');
             item.className = 'summary-item';
-            item.innerHTML = `<a href="${hat.url}" target="_blank">${hat.title}</a>`;
+            item.innerHTML = `
+                <img src="${hat.image}" alt="Thumbnail">
+                <a href="${hat.url}" target="_blank">${hat.title}</a>
+            `;
             likedList.appendChild(item);
         });
     }

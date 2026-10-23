@@ -7,7 +7,6 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            /* Added subtle gradient for depth */
             background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%);
             display: flex;
             flex-direction: column;
@@ -24,7 +23,6 @@
             position: relative;
             background: #fff;
             border-radius: 12px;
-            /* Enhanced shadow to make the container float off the background */
             box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
             border: 1px solid rgba(255,255,255,0.8);
             display: flex;
@@ -194,7 +192,7 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: transform 0.2s;
-            position: relative; /* Anchor for the like badge */
+            position: relative; 
         }
         .grid-item:hover { transform: translateY(-3px); }
         .grid-item img {
@@ -227,13 +225,13 @@
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            color: #d1d5db; /* Default gray heart */
+            color: #d1d5db; 
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 5;
             transition: color 0.2s ease, transform 0.1s;
         }
         .like-badge.liked {
-            color: #ef4444; /* Red heart when liked */
+            color: #ef4444; 
         }
         .like-badge.animate-pop {
             animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -351,6 +349,7 @@
 
 <script>
     const hats = [
+        // Original 15 Hats
         { title: "adidas Men's Tour Five-Panel Golf Cap", url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/23ADIMTRFVPNLBLKXAPA_Black?wid=481&qlt=70&hei=481&fit=constrain&fmt=webp&op_sharpen=1" },
         { title: "Columbia Men's PFG Mesh Hooks Ball Cap", url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather", image: "https://dks.scene7.com/is/image/GolfGalaxy/19CMBMPFGMSHHKSBLFAC_Grill_Heather?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
         { title: "VRST Men's Ultimate Cap", url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/21KRMMTHLTMTCPXXXMPD_Pure_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
@@ -365,7 +364,9 @@
         { title: "adidas Superlite 3 Hat", url: "https://www.dickssportinggoods.com/p/adidas-superlite-3-hat-25adiaddsmnssprltaoa/25adiaddsmnssprltaoa?color=Khaki%20Six%2FCargo%20Brown", image: "https://dks.scene7.com/is/image/GolfGalaxy/983539_KhakiSixCargoBrown_FRT_q6peio45?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
         { title: "TravisMathew Men's Diamond Club Golf Hat", url: "https://www.dickssportinggoods.com/p/travismathew-mens-diamond-club-golf-hat-26tramgolfdmndclbwbra/26tramgolfdmndclbwbra?color=White", image: "https://dks.scene7.com/is/image/GolfGalaxy/26TRAMGOLFDMNDCLBWBRA_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
         { title: "Bad Birdie Men's Sandwich Masters Golf Hat", url: "https://www.dickssportinggoods.com/p/bad-birdie-mens-sandwich-masters-golf-hat-26badagolfmstrshtsodu/26badagolfmstrshtsodu?color=Pine%20Grove", image: "https://dks.scene7.com/is/image/GolfGalaxy/26BADAGOLFMSTRSHTSODU_Pine_Grove?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
-        { title: "TravisMathew The Patch Floral Baseball Cap", url: "https://www.nordstrom.com/s/the-patch-floral-baseball-cap/7722894?origin=category-personalizedsort&breadcrumb=Home%2FMen%2FAccessories%2FHats&color=444444EYJY", image: "https://n.nordstrommedia.com/it/3f2aff45-43fd-46a1-9910-ee52d466b24f.jpeg?w=780&h=1170&crop=pad&dpr=2" }
+        { title: "TravisMathew The Patch Floral Baseball Cap", url: "https://www.nordstrom.com/s/the-patch-floral-baseball-cap/7722894?origin=category-personalizedsort&breadcrumb=Home%2FMen%2FAccessories%2FHats&color=444444EYJY", image: "https://n.nordstrommedia.com/it/3f2aff45-43fd-46a1-9910-ee52d466b24f.jpeg?w=780&h=1170&crop=pad&dpr=2" },
+        
+        // New Scraped Hats
         {
             "title": "Men's New Era White/Navy New York Yankees Foodie A-Frame 9FIFTY Trucker Snapback Hat",
             "url": "https://www.nordstrom.com/s/mens-new-era-white-navy-new-york-yankees-foodie-a-frame-9fifty-trucker-snapback-hat/9105391?origin=category-personalizedsort&breadcrumb=Home%2FMen%2FAccessories%2FHats&color=44444GU3TX",
@@ -399,7 +400,6 @@
     ];
 
     let currentIndex = 0;
-    // Using a Set prevents adding the exact same hat multiple times
     const likedHats = new Set();
     let isGridView = false;
     
@@ -518,10 +518,8 @@
             item.className = 'grid-item';
             item.onclick = () => openModal(hat);
             
-            // Check if this hat is already in the liked Set
             const isLiked = likedHats.has(hat);
             
-            // Build the Like Badge
             const badge = document.createElement('div');
             badge.className = `like-badge ${isLiked ? 'liked' : ''}`;
             badge.innerHTML = '♥';
@@ -537,7 +535,7 @@
     }
 
     function toggleGridLike(e, hat, badgeElement) {
-        e.stopPropagation(); // Prevents modal from opening when clicking the heart
+        e.stopPropagation(); 
         
         if (likedHats.has(hat)) {
             likedHats.delete(hat);
@@ -545,7 +543,6 @@
         } else {
             likedHats.add(hat);
             badgeElement.classList.add('liked');
-            // Trigger quick pop animation
             badgeElement.classList.add('animate-pop');
             setTimeout(() => badgeElement.classList.remove('animate-pop'), 300);
         }
@@ -555,7 +552,7 @@
         container.style.display = 'none';
         controls.style.display = 'none';
         gridContainer.style.display = 'none';
-        toggleBtn.style.display = 'none'; // Hide toggle in final view
+        toggleBtn.style.display = 'none'; 
         headerText.innerText = 'Review Complete';
         summary.style.display = 'block';
         
@@ -567,7 +564,6 @@
         }
 
         likedList.innerHTML = '';
-        // Convert Set back to Array to iterate
         Array.from(likedHats).forEach(hat => {
             const item = document.createElement('div');
             item.className = 'summary-item';

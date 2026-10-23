@@ -35,7 +35,24 @@
             color: #fff;
             font-size: 1.2rem;
             font-weight: bold;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+        .toggle-btn {
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-btn:hover { background: #4b5563; }
+        
+        /* Swipe View Styles */
         .card-container {
             flex-grow: 1;
             position: relative;
@@ -60,7 +77,11 @@
             box-sizing: border-box;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, opacity 0.3s ease;
+            touch-action: none; /* Prevents native scrolling while dragging */
+            cursor: grab;
+            user-select: none;
         }
+        .card:active { cursor: grabbing; }
         .card img {
             width: 100%;
             height: 250px;
@@ -68,6 +89,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             background-color: #f9fafb;
+            pointer-events: none; /* Prevents image drag ghosting */
         }
         .card h2 {
             font-size: 1.1rem;
@@ -77,6 +99,7 @@
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            pointer-events: none;
         }
         .card a {
             padding: 12px 24px;
@@ -88,9 +111,7 @@
             margin-top: 15px;
             width: 80%;
         }
-        .card a:hover {
-            background: #1d4ed8;
-        }
+        .card a:hover { background: #1d4ed8; }
         .controls {
             display: flex;
             justify-content: space-around;
@@ -114,6 +135,8 @@
         .btn:active { transform: scale(0.95); }
         .btn-pass { background: #fee2e2; color: #ef4444; }
         .btn-like { background: #d1fae5; color: #10b981; }
+        
+        /* Summary View Styles */
         #summary {
             display: none;
             padding: 20px;
@@ -141,112 +164,166 @@
             font-weight: bold;
             font-size: 0.9rem;
         }
+
+        /* Grid View Styles */
+        #grid-container {
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+            background: #f9fafb;
+            box-sizing: border-box;
+        }
+        .grid-item {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .grid-item:hover { transform: translateY(-3px); }
+        .grid-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+        .grid-item h3 {
+            font-size: 0.8rem;
+            margin: 10px 0 0;
+            color: #1f2937;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Modal Styles */
+        #modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(2px);
+        }
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            font-weight: bold;
+        }
+        .modal-content img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        .modal-content h2 { font-size: 1.1rem; margin-bottom: 20px; }
+        .modal-content a {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            width: 80%;
+        }
     </style>
 </head>
 <body>
 
 <div id="app-container">
-    <div class="header" id="header-text">Hat Reviewer</div>
+    <div class="header">
+        <span id="header-text">Hat Reviewer</span>
+        <button class="toggle-btn" id="view-toggle" onclick="toggleView()">Grid View</button>
+    </div>
     
+    <!-- Swipe Interface -->
     <div class="card-container" id="card-container">
         <!-- Cards will be injected here -->
     </div>
-    
     <div class="controls" id="controls">
         <button class="btn btn-pass" onclick="handleSwipe(false)">✖</button>
         <button class="btn btn-like" onclick="handleSwipe(true)">♥</button>
     </div>
 
+    <!-- Summary Interface -->
     <div id="summary">
         <h2>Liked Hats</h2>
         <div id="liked-list"></div>
     </div>
+
+    <!-- Grid Interface -->
+    <div id="grid-container">
+        <!-- Grid items will be injected here -->
+    </div>
+
+    <!-- Modal for Grid Items -->
+    <div id="modal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal(event)">&times;</span>
+            <img id="modal-img" src="" alt="Hat">
+            <h2 id="modal-title">Title</h2>
+            <a id="modal-link" href="#" target="_blank">View on Store</a>
+        </div>
+    </div>
 </div>
 
 <script>
-    // REPLACE THE PLACEHOLDER IMAGE URLS BELOW WITH THE ACTUAL IMAGE ADDRESSES
     const hats = [
-        { 
-            title: "adidas Men's Tour Five-Panel Golf Cap", 
-            url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/23ADIMTRFVPNLBLKXAPA_Black?wid=481&qlt=70&hei=481&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Columbia Men's PFG Mesh Hooks Ball Cap", 
-            url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/19CMBMPFGMSHHKSBLFAC_Grill_Heather?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "VRST Men's Ultimate Cap", 
-            url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/21KRMMTHLTMTCPXXXMPD_Pure_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Salty Crew Men's Sea Line Retro Trucker Hat", 
-            url: "https://www.dickssportinggoods.com/p/salty-crew-mens-sea-line-retro-trucker-hat-19eozmslnrtrtrckracc/19eozmslnrtrtrckracc?color=Black",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/19EOZMSLNRTRTRCKRACC_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Waggle Men's Moon Shot Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/waggle-mens-moon-shot-golf-hat-25wagmgolfmnshtblkqkw/25wagmgolfmnshtblkqkw?color=Black",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFMNSHTBLKQKW_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Waggle Men's Albatross Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/waggle-mens-albatross-golf-hat-26wagmgolfuq3r2bjjhh4/26wagmgolfuq3r2bjjhh4?color=Gray",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/26WAGMGOLFUQ3R2BJJHH4_Gray?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Waggle Men's Shooter Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/waggle-mens-shooter-golf-hat-25wagmgolfshtrhtblbab/25wagmgolfshtrhtblbab?color=Black",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSHTRHTBLBAB_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "GHOST GOLF Men's Icon Patch Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/chost-golf-mens-icon-patch-golf-hat-25pvmacnptchwhtxxapa/25pvmacnptchwhtxxapa?color=White",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/25PVMACNPTCHWHTXXAPA_White?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "Waggle Men's Snapper Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/waggle-mens-snapper-golf-hat-25wagmgolfsnpprtnxabu/25wagmgolfsnpprtnxabu?color=Tan",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSNPPRTNXABU_Tan?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1"
-        },
-        { 
-            title: "PUMA X PTC Men's Day Fade Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/puma-x-ptc-mens-day-fade-golf-hat-26pummgolfjl7rwwx5nuqa/26pummgolfjl7rwwx5nuqa?color=Black%2FWarm%20White",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/26PUMMGOLFJL7RWWX5NUQA_Black_Warm_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain"
-        },
-        { 
-            title: "TravisMathew Men's Coastal Charm Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/travismathew-mens-coastal-charm-golf-hat-26tramgolfyfwupjczdou/26tramgolfyfwupjczdou?color=White",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/26TRAMGOLFYFWUPJCZDOU_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain"
-        },
-        { 
-            title: "adidas Superlite 3 Hat", 
-            url: "https://www.dickssportinggoods.com/p/adidas-superlite-3-hat-25adiaddsmnssprltaoa/25adiaddsmnssprltaoa?color=Khaki%20Six%2FCargo%20Brown",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/983539_KhakiSixCargoBrown_FRT_q6peio45?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain"
-        },
-        { 
-            title: "TravisMathew Men's Diamond Club Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/travismathew-mens-diamond-club-golf-hat-26tramgolfdmndclbwbra/26tramgolfdmndclbwbra?color=White",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/26TRAMGOLFDMNDCLBWBRA_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain"
-        },
-        { 
-            title: "Bad Birdie Men's Sandwich Masters Golf Hat", 
-            url: "https://www.dickssportinggoods.com/p/bad-birdie-mens-sandwich-masters-golf-hat-26badagolfmstrshtsodu/26badagolfmstrshtsodu?color=Pine%20Grove",
-            image: "https://dks.scene7.com/is/image/GolfGalaxy/26BADAGOLFMSTRSHTSODU_Pine_Grove?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain"
-        },
-        { 
-            title: "TravisMathew The Patch Floral Baseball Cap", 
-            url: "https://www.nordstrom.com/s/the-patch-floral-baseball-cap/7722894?origin=category-personalizedsort&breadcrumb=Home%2FMen%2FAccessories%2FHats&color=444444EYJY",
-            image: "https://n.nordstrommedia.com/it/3f2aff45-43fd-46a1-9910-ee52d466b24f.jpeg?w=780&h=1170&crop=pad&dpr=2"
-        }
+        { title: "adidas Men's Tour Five-Panel Golf Cap", url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/23ADIMTRFVPNLBLKXAPA_Black?wid=481&qlt=70&hei=481&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Columbia Men's PFG Mesh Hooks Ball Cap", url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather", image: "https://dks.scene7.com/is/image/GolfGalaxy/19CMBMPFGMSHHKSBLFAC_Grill_Heather?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "VRST Men's Ultimate Cap", url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/21KRMMTHLTMTCPXXXMPD_Pure_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Salty Crew Men's Sea Line Retro Trucker Hat", url: "https://www.dickssportinggoods.com/p/salty-crew-mens-sea-line-retro-trucker-hat-19eozmslnrtrtrckracc/19eozmslnrtrtrckracc?color=Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/19EOZMSLNRTRTRCKRACC_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Waggle Men's Moon Shot Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-moon-shot-golf-hat-25wagmgolfmnshtblkqkw/25wagmgolfmnshtblkqkw?color=Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFMNSHTBLKQKW_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Waggle Men's Albatross Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-albatross-golf-hat-26wagmgolfuq3r2bjjhh4/26wagmgolfuq3r2bjjhh4?color=Gray", image: "https://dks.scene7.com/is/image/GolfGalaxy/26WAGMGOLFUQ3R2BJJHH4_Gray?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Waggle Men's Shooter Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-shooter-golf-hat-25wagmgolfshtrhtblbab/25wagmgolfshtrhtblbab?color=Black", image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSHTRHTBLBAB_Black?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "GHOST GOLF Men's Icon Patch Golf Hat", url: "https://www.dickssportinggoods.com/p/chost-golf-mens-icon-patch-golf-hat-25pvmacnptchwhtxxapa/25pvmacnptchwhtxxapa?color=White", image: "https://dks.scene7.com/is/image/GolfGalaxy/25PVMACNPTCHWHTXXAPA_White?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "Waggle Men's Snapper Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-snapper-golf-hat-25wagmgolfsnpprtnxabu/25wagmgolfsnpprtnxabu?color=Tan", image: "https://dks.scene7.com/is/image/GolfGalaxy/25WAGMGOLFSNPPRTNXABU_Tan?wid=769&qlt=70&hei=769&fit=constrain&fmt=webp&op_sharpen=1" },
+        { title: "PUMA X PTC Men's Day Fade Golf Hat", url: "https://www.dickssportinggoods.com/p/puma-x-ptc-mens-day-fade-golf-hat-26pummgolfjl7rwwx5nuqa/26pummgolfjl7rwwx5nuqa?color=Black%2FWarm%20White", image: "https://dks.scene7.com/is/image/GolfGalaxy/26PUMMGOLFJL7RWWX5NUQA_Black_Warm_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
+        { title: "TravisMathew Men's Coastal Charm Golf Hat", url: "https://www.dickssportinggoods.com/p/travismathew-mens-coastal-charm-golf-hat-26tramgolfyfwupjczdou/26tramgolfyfwupjczdou?color=White", image: "https://dks.scene7.com/is/image/GolfGalaxy/26TRAMGOLFYFWUPJCZDOU_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
+        { title: "adidas Superlite 3 Hat", url: "https://www.dickssportinggoods.com/p/adidas-superlite-3-hat-25adiaddsmnssprltaoa/25adiaddsmnssprltaoa?color=Khaki%20Six%2FCargo%20Brown", image: "https://dks.scene7.com/is/image/GolfGalaxy/983539_KhakiSixCargoBrown_FRT_q6peio45?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
+        { title: "TravisMathew Men's Diamond Club Golf Hat", url: "https://www.dickssportinggoods.com/p/travismathew-mens-diamond-club-golf-hat-26tramgolfdmndclbwbra/26tramgolfdmndclbwbra?color=White", image: "https://dks.scene7.com/is/image/GolfGalaxy/26TRAMGOLFDMNDCLBWBRA_White?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
+        { title: "Bad Birdie Men's Sandwich Masters Golf Hat", url: "https://www.dickssportinggoods.com/p/bad-birdie-mens-sandwich-masters-golf-hat-26badagolfmstrshtsodu/26badagolfmstrshtsodu?color=Pine%20Grove", image: "https://dks.scene7.com/is/image/GolfGalaxy/26BADAGOLFMSTRSHTSODU_Pine_Grove?qlt=70&wid=780&hei=780&fmt=webp&op_sharpen=1&fit=constrain" },
+        { title: "TravisMathew The Patch Floral Baseball Cap", url: "https://www.nordstrom.com/s/the-patch-floral-baseball-cap/7722894?origin=category-personalizedsort&breadcrumb=Home%2FMen%2FAccessories%2FHats&color=444444EYJY", image: "https://n.nordstrommedia.com/it/3f2aff45-43fd-46a1-9910-ee52d466b24f.jpeg?w=780&h=1170&crop=pad&dpr=2" }
     ];
 
     let currentIndex = 0;
     const likedHats = [];
+    let isGridView = false;
+    
+    // Elements
     const container = document.getElementById('card-container');
+    const controls = document.getElementById('controls');
+    const summary = document.getElementById('summary');
+    const gridContainer = document.getElementById('grid-container');
+    const toggleBtn = document.getElementById('view-toggle');
+    const headerText = document.getElementById('header-text');
 
+    // --- SWIPE LOGIC ---
     function renderCard() {
         if (currentIndex >= hats.length) {
             showSummary();
@@ -264,12 +341,52 @@
         `;
         container.innerHTML = '';
         container.appendChild(card);
+
+        attachSwipeListeners(card);
+    }
+
+    function attachSwipeListeners(card) {
+        let isDragging = false;
+        let startX = 0;
+        let currentTranslate = 0;
+        const SWIPE_THRESHOLD = 100; // Pixels needed to trigger swipe
+
+        card.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            card.style.transition = 'none'; // Disable smooth transition to track finger exactly
+            card.setPointerCapture(e.pointerId);
+        });
+
+        card.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const currentX = e.clientX;
+            currentTranslate = currentX - startX;
+            const rotate = currentTranslate * 0.05;
+            card.style.transform = `translateX(${currentTranslate}px) rotate(${rotate}deg)`;
+        });
+
+        card.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; // Turn transition back on
+            
+            if (currentTranslate > SWIPE_THRESHOLD) {
+                handleSwipe(true);
+            } else if (currentTranslate < -SWIPE_THRESHOLD) {
+                handleSwipe(false);
+            } else {
+                // Snap back to center if threshold not met
+                card.style.transform = 'translateX(0) rotate(0deg)';
+            }
+        });
     }
 
     function handleSwipe(liked) {
         if (currentIndex >= hats.length) return;
         
         const card = document.getElementById('current-card');
+        card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
         card.style.transform = liked ? 'translateX(150%) rotate(20deg)' : 'translateX(-150%) rotate(-20deg)';
         card.style.opacity = '0';
 
@@ -284,20 +401,19 @@
     }
 
     function showSummary() {
-        document.getElementById('card-container').style.display = 'none';
-        document.getElementById('controls').style.display = 'none';
-        document.getElementById('header-text').innerText = 'Review Complete';
-        
-        const summary = document.getElementById('summary');
-        const likedList = document.getElementById('liked-list');
-        
+        container.style.display = 'none';
+        controls.style.display = 'none';
+        headerText.innerText = 'Review Complete';
         summary.style.display = 'block';
+        
+        const likedList = document.getElementById('liked-list');
         
         if (likedHats.length === 0) {
             likedList.innerHTML = '<p style="text-align:center;">No hats selected.</p>';
             return;
         }
 
+        likedList.innerHTML = '';
         likedHats.forEach(hat => {
             const item = document.createElement('div');
             item.className = 'summary-item';
@@ -307,6 +423,55 @@
             `;
             likedList.appendChild(item);
         });
+    }
+
+    // --- GRID VIEW LOGIC ---
+    function toggleView() {
+        isGridView = !isGridView;
+        
+        if (isGridView) {
+            toggleBtn.innerText = 'Swipe View';
+            container.style.display = 'none';
+            controls.style.display = 'none';
+            summary.style.display = 'none';
+            gridContainer.style.display = 'grid';
+            renderGrid();
+        } else {
+            toggleBtn.innerText = 'Grid View';
+            gridContainer.style.display = 'none';
+            if (currentIndex >= hats.length) {
+                summary.style.display = 'block';
+            } else {
+                container.style.display = 'flex';
+                controls.style.display = 'flex';
+            }
+        }
+    }
+
+    function renderGrid() {
+        gridContainer.innerHTML = '';
+        hats.forEach((hat, index) => {
+            const item = document.createElement('div');
+            item.className = 'grid-item';
+            item.onclick = () => openModal(hat);
+            item.innerHTML = `
+                <img src="${hat.image}" alt="${hat.title}" loading="lazy">
+                <h3>${hat.title}</h3>
+            `;
+            gridContainer.appendChild(item);
+        });
+    }
+
+    function openModal(hat) {
+        const modal = document.getElementById('modal');
+        document.getElementById('modal-img').src = hat.image;
+        document.getElementById('modal-title').innerText = hat.title;
+        document.getElementById('modal-link').href = hat.url;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal(event) {
+        document.getElementById('modal').style.display = 'none';
     }
 
     // Initialize

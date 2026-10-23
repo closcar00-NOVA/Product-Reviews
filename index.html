@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%);
+            /* Updated to dark slate grey to black gradient */
+            background: linear-gradient(135deg, #334155 0%, #020617 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -19,12 +20,15 @@
         #app-container {
             width: 100%;
             max-width: 400px;
-            height: 650px;
+            /* Updated height to fill most of the screen vertically */
+            height: 94vh;
+            max-height: 900px; 
             position: relative;
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.8);
+            /* Darkened the shadow slightly to blend better with the dark background */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 5px 15px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -86,7 +90,8 @@
         .card:active { cursor: grabbing; }
         .card img {
             width: 100%;
-            height: 250px;
+            /* Increased image max-height slightly for the taller cards */
+            height: 300px;
             object-fit: contain;
             border-radius: 8px;
             margin-bottom: 15px;

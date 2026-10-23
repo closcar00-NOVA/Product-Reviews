@@ -7,7 +7,8 @@
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f3f4f6;
+            /* Added subtle gradient for depth */
+            background: linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,7 +24,9 @@
             position: relative;
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            /* Enhanced shadow to make the container float off the background */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12), 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.8);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -39,6 +42,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
         .toggle-btn {
             background: #374151;
@@ -77,7 +81,7 @@
             box-sizing: border-box;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: transform 0.3s ease, opacity 0.3s ease;
-            touch-action: none; /* Prevents native scrolling while dragging */
+            touch-action: none; 
             cursor: grab;
             user-select: none;
         }
@@ -89,7 +93,7 @@
             border-radius: 8px;
             margin-bottom: 15px;
             background-color: #f9fafb;
-            pointer-events: none; /* Prevents image drag ghosting */
+            pointer-events: none; 
         }
         .card h2 {
             font-size: 1.1rem;
@@ -143,7 +147,7 @@
             overflow-y: auto;
             height: 100%;
         }
-        #summary h2 { text-align: center; color: #111; }
+        #summary h2 { text-align: center; color: #111; margin-top: 0; }
         .summary-item {
             padding: 15px;
             border-bottom: 1px solid #e5e7eb;
@@ -168,13 +172,18 @@
         /* Grid View Styles */
         #grid-container {
             display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            flex-direction: column;
             padding: 20px;
             overflow-y: auto;
             height: 100%;
             background: #f9fafb;
             box-sizing: border-box;
+        }
+        #grid-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .grid-item {
             background: #fff;
@@ -185,6 +194,7 @@
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: transform 0.2s;
+            position: relative; /* Anchor for the like badge */
         }
         .grid-item:hover { transform: translateY(-3px); }
         .grid-item img {
@@ -203,6 +213,50 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+        
+        /* Grid Like Badge Styles */
+        .like-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #d1d5db; /* Default gray heart */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 5;
+            transition: color 0.2s ease, transform 0.1s;
+        }
+        .like-badge.liked {
+            color: #ef4444; /* Red heart when liked */
+        }
+        .like-badge.animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        .finish-grid-btn {
+            padding: 15px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .finish-grid-btn:hover { background: #059669; }
 
         /* Modal Styles */
         #modal {
@@ -278,7 +332,10 @@
 
     <!-- Grid Interface -->
     <div id="grid-container">
-        <!-- Grid items will be injected here -->
+        <div id="grid-wrapper">
+            <!-- Grid items will be injected here -->
+        </div>
+        <button class="finish-grid-btn" onclick="forceSummary()">See Final Results</button>
     </div>
 
     <!-- Modal for Grid Items -->
@@ -312,7 +369,8 @@
     ];
 
     let currentIndex = 0;
-    const likedHats = [];
+    // Using a Set prevents adding the exact same hat multiple times
+    const likedHats = new Set();
     let isGridView = false;
     
     // Elements
@@ -320,13 +378,14 @@
     const controls = document.getElementById('controls');
     const summary = document.getElementById('summary');
     const gridContainer = document.getElementById('grid-container');
+    const gridWrapper = document.getElementById('grid-wrapper');
     const toggleBtn = document.getElementById('view-toggle');
     const headerText = document.getElementById('header-text');
 
     // --- SWIPE LOGIC ---
     function renderCard() {
         if (currentIndex >= hats.length) {
-            showSummary();
+            forceSummary();
             return;
         }
 
@@ -349,12 +408,12 @@
         let isDragging = false;
         let startX = 0;
         let currentTranslate = 0;
-        const SWIPE_THRESHOLD = 100; // Pixels needed to trigger swipe
+        const SWIPE_THRESHOLD = 100;
 
         card.addEventListener('pointerdown', (e) => {
             isDragging = true;
             startX = e.clientX;
-            card.style.transition = 'none'; // Disable smooth transition to track finger exactly
+            card.style.transition = 'none';
             card.setPointerCapture(e.pointerId);
         });
 
@@ -369,14 +428,13 @@
         card.addEventListener('pointerup', (e) => {
             if (!isDragging) return;
             isDragging = false;
-            card.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; // Turn transition back on
+            card.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
             
             if (currentTranslate > SWIPE_THRESHOLD) {
                 handleSwipe(true);
             } else if (currentTranslate < -SWIPE_THRESHOLD) {
                 handleSwipe(false);
             } else {
-                // Snap back to center if threshold not met
                 card.style.transform = 'translateX(0) rotate(0deg)';
             }
         });
@@ -391,38 +449,13 @@
         card.style.opacity = '0';
 
         if (liked) {
-            likedHats.push(hats[currentIndex]);
+            likedHats.add(hats[currentIndex]);
         }
 
         setTimeout(() => {
             currentIndex++;
             renderCard();
         }, 300);
-    }
-
-    function showSummary() {
-        container.style.display = 'none';
-        controls.style.display = 'none';
-        headerText.innerText = 'Review Complete';
-        summary.style.display = 'block';
-        
-        const likedList = document.getElementById('liked-list');
-        
-        if (likedHats.length === 0) {
-            likedList.innerHTML = '<p style="text-align:center;">No hats selected.</p>';
-            return;
-        }
-
-        likedList.innerHTML = '';
-        likedHats.forEach(hat => {
-            const item = document.createElement('div');
-            item.className = 'summary-item';
-            item.innerHTML = `
-                <img src="${hat.image}" alt="Thumbnail">
-                <a href="${hat.url}" target="_blank">${hat.title}</a>
-            `;
-            likedList.appendChild(item);
-        });
     }
 
     // --- GRID VIEW LOGIC ---
@@ -434,13 +467,13 @@
             container.style.display = 'none';
             controls.style.display = 'none';
             summary.style.display = 'none';
-            gridContainer.style.display = 'grid';
+            gridContainer.style.display = 'flex';
             renderGrid();
         } else {
             toggleBtn.innerText = 'Grid View';
             gridContainer.style.display = 'none';
             if (currentIndex >= hats.length) {
-                summary.style.display = 'block';
+                forceSummary();
             } else {
                 container.style.display = 'flex';
                 controls.style.display = 'flex';
@@ -449,19 +482,74 @@
     }
 
     function renderGrid() {
-        gridContainer.innerHTML = '';
-        hats.forEach((hat, index) => {
+        gridWrapper.innerHTML = '';
+        hats.forEach((hat) => {
             const item = document.createElement('div');
             item.className = 'grid-item';
             item.onclick = () => openModal(hat);
+            
+            // Check if this hat is already in the liked Set
+            const isLiked = likedHats.has(hat);
+            
+            // Build the Like Badge
+            const badge = document.createElement('div');
+            badge.className = `like-badge ${isLiked ? 'liked' : ''}`;
+            badge.innerHTML = '♥';
+            badge.onclick = (e) => toggleGridLike(e, hat, badge);
+
             item.innerHTML = `
                 <img src="${hat.image}" alt="${hat.title}" loading="lazy">
                 <h3>${hat.title}</h3>
             `;
-            gridContainer.appendChild(item);
+            item.appendChild(badge);
+            gridWrapper.appendChild(item);
         });
     }
 
+    function toggleGridLike(e, hat, badgeElement) {
+        e.stopPropagation(); // Prevents modal from opening when clicking the heart
+        
+        if (likedHats.has(hat)) {
+            likedHats.delete(hat);
+            badgeElement.classList.remove('liked');
+        } else {
+            likedHats.add(hat);
+            badgeElement.classList.add('liked');
+            // Trigger quick pop animation
+            badgeElement.classList.add('animate-pop');
+            setTimeout(() => badgeElement.classList.remove('animate-pop'), 300);
+        }
+    }
+
+    function forceSummary() {
+        container.style.display = 'none';
+        controls.style.display = 'none';
+        gridContainer.style.display = 'none';
+        toggleBtn.style.display = 'none'; // Hide toggle in final view
+        headerText.innerText = 'Review Complete';
+        summary.style.display = 'block';
+        
+        const likedList = document.getElementById('liked-list');
+        
+        if (likedHats.size === 0) {
+            likedList.innerHTML = '<p style="text-align:center;">No hats selected.</p>';
+            return;
+        }
+
+        likedList.innerHTML = '';
+        // Convert Set back to Array to iterate
+        Array.from(likedHats).forEach(hat => {
+            const item = document.createElement('div');
+            item.className = 'summary-item';
+            item.innerHTML = `
+                <img src="${hat.image}" alt="Thumbnail">
+                <a href="${hat.url}" target="_blank">${hat.title}</a>
+            `;
+            likedList.appendChild(item);
+        });
+    }
+
+    // Modal behavior
     function openModal(hat) {
         const modal = document.getElementById('modal');
         document.getElementById('modal-img').src = hat.image;

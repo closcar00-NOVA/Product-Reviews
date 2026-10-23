@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hat Reviewer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .header {
+            padding: 20px;
+            text-align: center;
+            background: #111;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .card-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            width: 80%;
+            height: 80%;
+            background: #fff;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+        .card a {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+        }
+        .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-pass { background: #fee2e2; color: #ef4444; }
+        .btn-like { background: #d1fae5; color: #10b981; }
+        #summary {
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+        }
+        #summary h2 { text-align: center; color: #111; }
+        .summary-item {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .summary-item a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div class="header" id="header-text">Hat Reviewer</div>
+    
+    <div class="card-container" id="card-container">
+        <!-- Cards will be injected here -->
+    </div>
+    
+    <div class="controls" id="controls">
+        <button class="btn btn-pass" onclick="handleSwipe(false)">✖</button>
+        <button class="btn btn-like" onclick="handleSwipe(true)">♥</button>
+    </div>
+
+    <div id="summary">
+        <h2>Liked Hats</h2>
+        <div id="liked-list"></div>
+    </div>
+</div>
+
+<script>
+    const hats = [
+        { title: "adidas Men's Tour Five-Panel Golf Cap", url: "https://www.dickssportinggoods.com/p/adidas-mens-tour-five-panel-golf-cap-23adimtrfvpnlblkxapa/23adimtrfvpnlblkxapa?color=Black" },
+        { title: "Columbia Men's PFG Mesh Hooks Ball Cap", url: "https://www.dickssportinggoods.com/p/columbia-mens-pfg-mesh-hooks-ball-cap-19cmbmpfgmshhksblfac/19cmbmpfgmshhksblfac?color=Grill%20Heather" },
+        { title: "VRST Men's Ultimate Cap", url: "https://www.dickssportinggoods.com/p/vrst-mens-ultimate-cap-21krmmthltmtcpxxxmpd/21krmmthltmtcpxxxmpd?color=Pure%20Black" },
+        { title: "Salty Crew Men's Sea Line Retro Trucker Hat", url: "https://www.dickssportinggoods.com/p/salty-crew-mens-sea-line-retro-trucker-hat-19eozmslnrtrtrckracc/19eozmslnrtrtrckracc?color=Black" },
+        { title: "Waggle Men's Moon Shot Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-moon-shot-golf-hat-25wagmgolfmnshtblkqkw/25wagmgolfmnshtblkqkw?color=Black" },
+        { title: "Waggle Men's Albatross Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-albatross-golf-hat-26wagmgolfuq3r2bjjhh4/26wagmgolfuq3r2bjjhh4?color=Gray" },
+        { title: "Waggle Men's Shooter Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-shooter-golf-hat-25wagmgolfshtrhtblbab/25wagmgolfshtrhtblbab?color=Black" },
+        { title: "GHOST GOLF Men's Icon Patch Golf Hat", url: "https://www.dickssportinggoods.com/p/chost-golf-mens-icon-patch-golf-hat-25pvmacnptchwhtxxapa/25pvmacnptchwhtxxapa?color=White" },
+        { title: "Waggle Men's Snapper Golf Hat", url: "https://www.dickssportinggoods.com/p/waggle-mens-snapper-golf-hat-25wagmgolfsnpprtnxabu/25wagmgolfsnpprtnxabu?color=Tan" }
+    ];
+
+    let currentIndex = 0;
+    const likedHats = [];
+    const container = document.getElementById('card-container');
+
+    function renderCard() {
+        if (currentIndex >= hats.length) {
+            showSummary();
+            return;
+        }
+
+        const hat = hats[currentIndex];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = 'current-card';
+        card.innerHTML = `
+            <h2>${hat.title}</h2>
+            <a href="${hat.url}" target="_blank">View on Store</a>
+        `;
+        container.innerHTML = '';
+        container.appendChild(card);
+    }
+
+    function handleSwipe(liked) {
+        if (currentIndex >= hats.length) return;
+        
+        const card = document.getElementById('current-card');
+        card.style.transform = liked ? 'translateX(150%) rotate(20deg)' : 'translateX(-150%) rotate(-20deg)';
+        card.style.opacity = '0';
+
+        if (liked) {
+            likedHats.push(hats[currentIndex]);
+        }
+
+        setTimeout(() => {
+            currentIndex++;
+            renderCard();
+        }, 300);
+    }
+
+    function showSummary() {
+        document.getElementById('card-container').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('header-text').innerText = 'Review Complete';
+        
+        const summary = document.getElementById('summary');
+        const likedList = document.getElementById('liked-list');
+        
+        summary.style.display = 'block';
+        
+        if (likedHats.length === 0) {
+            likedList.innerHTML = '<p style="text-align:center;">No hats selected.</p>';
+            return;
+        }
+
+        likedHats.forEach(hat => {
+            const item = document.createElement('div');
+            item.className = 'summary-item';
+            item.innerHTML = `<a href="${hat.url}" target="_blank">${hat.title}</a>`;
+            likedList.appendChild(item);
+        });
+    }
+
+    // Initialize
+    renderCard();
+</script>
+
+</body>
+</html>
